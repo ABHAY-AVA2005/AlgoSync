@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoSync Dashboard</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <img src="assets/AlgoSync extension logo.png" alt="AlgoSync Logo" class="logo-img">
+        <h1>AlgoSync</h1>
+      </div>
+      <div class="status-indicator" id="auth-status">
+        <span class="dot red"></span>
+        <span class="status-text">Disconnected</span>
+      </div>
+    </header>
+
+    <main id="auth-view" class="view">
+      <div class="hero">
+        <h2>Link your GitHub</h2>
+        <p>Sync your solutions automatically to your repositories.</p>
+      </div>
+      <button id="btn-login" class="btn-primary">
+        <img src="assets/github.svg" alt="" class="btn-icon">
+        Connect GitHub
+      </button>
+    </main>
+
+    <main id="dashboard-view" class="view hidden">
+      <div class="repo-section">
+        <label for="repo-select">Target Repository</label>
+        <div class="custom-select">
+          <select id="repo-select">
+            <option value="" disabled selected>Select a repository</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-easy">0</span>
+          <span class="stat-label" style="color: var(--green)">Easy</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-medium">0</span>
+          <span class="stat-label" style="color: #fbbf24">Med</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-hard">0</span>
+          <span class="stat-label" style="color: var(--red)">Hard</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btn-unlink" class="btn-secondary">Unlink GitHub</button>
+      </div>
+    </main>
+
+    <footer>
+      <p>Made with ❤️ for LeetCoders</p>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

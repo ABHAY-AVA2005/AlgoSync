@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "AlgoSync",
+  "version": "1.0.0",
+  "description": "Sync LeetCode, GFG, and HackerRank solutions to GitHub with versioning and test cases.",
+  "permissions": [
+    "identity",
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://leetcode.com/*",
+    "https://*.geeksforgeeks.org/*",
+    "https://*.hackerrank.com/*",
+    "https://api.github.com/*",
+    "https://github.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "assets/AlgoSync extension logo.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/problems/*",
+        "https://*.geeksforgeeks.org/problems/*",
+        "https://*.hackerrank.com/challenges/*"
+      ],
+      "js": ["scripts/content-script.js"],
+      "css": ["assets/badge.css"]
+    }
+  ],
+  "icons": {
+    "128": "assets/AlgoSync extension logo.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
