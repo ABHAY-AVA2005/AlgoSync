@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgoSync | Your DSA Portfolio, Automated.</title>
+    <link rel="icon" type="image/png" href="/favicon.png?v=3">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --bg: #030712;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+
+        /* --- Abstract Fluid Gradient Background (Liquid Motion) --- */
+        .fluid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #080710, #030206);
+            pointer-events: none;
+        }
+
+        .fluid-blob {
+            position: absolute;
+            width: 900px;
+            height: 900px;
+            filter: blur(95px); /* Reduced blur for highly defined organic wave outlines */
+            opacity: 0.55; /* Boosted opacity for intense screen vibrance */
+            mix-blend-mode: screen;
+            will-change: transform, border-radius;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+        }
+
+        /* Blob 1: Vibrant Hot Orange Splash */
+        .blob-purple {
+            top: -15%;
+            left: -15%;
+            background: radial-gradient(circle, rgba(255, 90, 0, 0.85) 0%, rgba(255, 0, 80, 0) 70%);
+            animation: fluid-motion-1 25s infinite alternate;
+        }
+
+        /* Blob 2: Bright Ocean Cyan Wave */
+        .blob-teal {
+            bottom: -15%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.8) 0%, rgba(0, 80, 255, 0) 70%);
+            animation: fluid-motion-2 20s infinite alternate;
+        }
+
+        /* Blob 3: Hot Pink & Magenta Fluid Splash */
+        .blob-magenta {
+            top: 35%;
+            right: 8%;
+            background: radial-gradient(circle, rgba(255, 0, 128, 0.8) 0%, rgba(139, 92, 246, 0) 70%);
+            animation: fluid-motion-3 17s infinite alternate;
+        }
+
+        /* Blob 4: Deep Neon Purple Core */
+        .blob-indigo {
+            bottom: 25%;
+            left: 5%;
+            background: radial-gradient(circle, rgba(160, 0, 255, 0.8) 0%, rgba(99, 102, 241, 0) 70%);
+            animation: fluid-motion-4 22s infinite alternate;
+        }
+
+        @keyframes fluid-motion-1 {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+                border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+            }
+            50% {
+                transform: translate3d(150px, 80px, 0) scale(1.2) rotate(180deg);
+                border-radius: 70% 30% 52% 48% / 60% 40% 60% 40%;
+            }
+            100% {
+                transform: translate3d(-50px, 120px, 0) scale(0.9) rotate(360deg);
+                border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+            }
+        }
+
+        @keyframes fluid-motion-2 {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1.1) rotate(0deg);
+                border-radius: 50% 50% 30% 70% / 50% 60% 40% 50%;
+            }
+            50% {
+                transform: translate3d(-120px, -150px, 0) scale(0.85) rotate(-120deg);
+                border-radius: 30% 70% 70% 30% / 50% 30% 70% 50%;
+            }
+            100% {
+                transform: translate3d(80px, -50px, 0) scale(1) rotate(-240deg);
+                border-radius: 50% 50% 30% 70% / 50% 60% 40% 50%;
+            }
+        }
+
+        @keyframes fluid-motion-3 {
+            0% {
+                transform: translate3d(0, 0, 0) scale(0.9) rotate(0deg);
+                border-radius: 60% 40% 60% 40% / 40% 60% 40% 60%;
+            }
+            50% {
+                transform: translate3d(-80px, 100px, 0) scale(1.15) rotate(90deg);
+                border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
+            }
+            100% {
+                transform: translate3d(100px, -60px, 0) scale(1) rotate(180deg);
+                border-radius: 60% 40% 60% 40% / 40% 60% 40% 60%;
+            }
+        }
+
+        @keyframes fluid-motion-4 {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+                border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+            }
+            50% {
+                transform: translate3d(120px, -90px, 0) scale(0.8) rotate(150deg);
+                border-radius: 64% 36% 44% 56% / 49% 62% 38% 51%;
+            }
+            100% {
+                transform: translate3d(-60px, 40px, 0) scale(1.1) rotate(300deg);
+                border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+            }
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem max(2rem, 5vw);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+        .logo { font-size: 1.8rem; font-weight: 800; display: flex; align-items: center; gap: 0.8rem; text-decoration: none; color: #fff; letter-spacing: -0.5px; transition: 0.3s; }
+        .logo:hover { opacity: 0.8; }
+        .logo i { color: var(--primary); }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+        .btn-nav {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transition: 0.3s;
+        }
+        .btn-nav:hover { transform: translateY(-3px); box-shadow: 0 6px 25px var(--primary-glow); }
+
+        /* --- Hero Section --- */
+        .hero {
+            padding: 8rem 10% 6rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .hero-badge {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+        .gradient-text {
+            background: linear-gradient(90deg, #fff, var(--primary), #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 5s linear infinite;
+        }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 3rem; max-width: 700px; margin-inline: auto; }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        /* --- Features --- */
+        .features { padding: 6rem max(2rem, 5vw); }
+        .section-title { text-align: center; margin-bottom: 4rem; }
+        .section-title h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 24px;
+            transition: 0.4s;
+            cursor: pointer;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            background: rgba(139, 92, 246, 0.05);
+        }
+        .feature-card i { font-size: 2.5rem; color: var(--primary); margin-bottom: 1.5rem; }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        .feature-card p { color: var(--text-muted); font-size: 1rem; }
+
+        /* --- Mockup Section --- */
+        .mockup-container {
+            margin-top: 4rem;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .mockup {
+            width: 80%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .mockup-img { width: 100%; border-radius: 12px; }
+
+        /* --- Footer --- */
+        footer { padding: 4rem 10%; border-top: 1px solid var(--border); text-align: center; }
+        .footer-logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; display: block; text-decoration: none; color: white; }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; list-style: none; margin-bottom: 2rem; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; }
+        .copyright { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* --- Share Card Generator --- */
+        .share-card-section {
+            padding: 8rem 10%;
+            background: linear-gradient(180deg, var(--bg) 0%, rgba(139, 92, 246, 0.03) 50%, var(--bg) 100%);
+            border-top: 1px solid var(--border);
+        }
+
+        .share-container {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .customizer-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 28px;
+            backdrop-filter: blur(10px);
+            text-align: left;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.6rem;
+        }
+
+        .control-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .control-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .theme-option {
+            flex: 1;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .theme-option.active {
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        .theme-midnight {
+            background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #0d0d12 100%);
+            color: #c084fc;
+        }
+
+        .theme-toxic {
+            background: linear-gradient(135deg, #022c22 0%, #020617 100%);
+            color: #34d399;
+        }
+
+        .theme-solar {
+            background: linear-gradient(135deg, #451a03 0%, #1e1b4b 100%);
+            color: #fb923c;
+        }
+
+        .btn-download {
+            width: 100%;
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 1.1rem;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transition: 0.3s;
+            margin-top: 1.5rem;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--primary-glow);
+        }
+
+        /* --- Preview Card --- */
+        .card-preview-wrapper {
+            perspective: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .share-card-preview {
+            width: 520px;
+            height: 290px;
+            border-radius: 24px;
+            padding: 2.2rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.1s ease;
+            transform-style: preserve-3d;
+            text-align: left;
+        }
+
+        .share-card-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 2;
+        }
+
+        .card-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-user-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .card-user-repo {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2px;
+            font-family: monospace;
+        }
+
+        .card-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-logo i {
+            color: var(--primary);
+        }
+
+        .card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .card-stats {
+            display: flex;
+            align-items: baseline;
+            gap: 0.8rem;
+        }
+
+        .card-total-val {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(to bottom, #fff, rgba(255,255,255,0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-total-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-streak {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(249, 115, 22, 0.08);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: #fb923c;
+            padding: 8px 16px;
+            border-radius: 50px;
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
+        }
+
+        .card-streak i {
+            font-size: 1.1rem;
+            animation: flame-pulse 1.5s infinite alternate;
+        }
+
+        @keyframes flame-pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px #fb923c); }
+            100% { transform: scale(1.15); filter: drop-shadow(0 0 8px #f97316); }
+        }
+
+        .card-streak-details {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .card-streak-val {
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        .card-streak-start {
+            font-size: 0.65rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 1.2rem;
+            z-index: 2;
+        }
+
+        .card-meta-distributions {
+            display: flex;
+            gap: 1.2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-meta-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .card-meta-dot.easy { background-color: #34d399; }
+        .card-meta-dot.medium { background-color: #fbbf24; }
+        .card-meta-dot.hard { background-color: #f87171; }
+
+        .card-meta-item span {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .card-brand {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1250px) {
+            nav {
+                padding: 1rem max(1.5rem, 4vw);
+            }
+            .nav-links {
+                gap: 1.5rem;
+            }
+            .hero h1 {
+                font-size: 3.8rem;
+            }
+        }
+
+        @media (max-width: 1150px) {
+            .share-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            .share-card-preview {
+                width: 100%;
+                max-width: 480px;
+                height: 270px;
+            }
+            .share-card-section {
+                padding: 4rem 5%;
+            }
+            nav {
+                padding: 1rem max(1rem, 3vw);
+            }
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.95rem;
+            }
+            .btn-nav {
+                padding: 0.7rem 1.4rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .nav-links { display: none; }
+            nav { padding: 1.2rem 5%; }
+            .hero h1 { font-size: 3rem; }
+        }
+        /* --- Creator Section --- */
+        .creator-section {
+            padding: 6rem 10%;
+            text-align: center;
+            background: linear-gradient(0deg, rgba(139, 92, 246, 0.05) 0%, var(--bg) 100%);
+            border-top: 1px solid var(--border);
+        }
+        .creator-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 3rem;
+            border-radius: 24px;
+            transition: 0.4s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .creator-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.1);
+        }
+        .creator-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            margin-bottom: 1.5rem;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+        .creator-name {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .creator-role {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .creator-socials {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .creator-socials a {
+            color: var(--text-muted);
+            font-size: 1.8rem;
+            transition: 0.3s;
+        }
+        .creator-socials a:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+        .creator-email {
+            display: inline-block;
+            margin-top: 1.8rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .creator-email:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .creator-email:hover {
+            background: var(--primary);
+            color: white;
+        }
+        /* --- Creator Badge & Feedback --- */
+        .creator-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 2rem;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .creator-badge:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        .creator-badge img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        .feedback-section {
+            padding: 6rem 10%;
+            background: var(--bg);
+            text-align: center;
+        }
+        .feedback-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 3rem auto 0;
+        }
+        .feedback-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: 0.3s;
+        }
+        .feedback-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+        .feedback-card i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        .btn-outline {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* --- Reviews Section --- */
+        .reviews-section {
+            padding: 6rem 10%;
+            background: linear-gradient(180deg, var(--bg) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border-top: 1px solid var(--border);
+        }
+        .reviews-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .reviews-container { grid-template-columns: 1fr; }
+        }
+        .review-form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 24px;
+        }
+        .review-form-card h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            transition: 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+        textarea.form-input {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .rating-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .star-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .star-btn:hover, .star-btn.active {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .reviews-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .reviews-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        .review-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .review-author {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .review-stars {
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+        .review-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .review-date {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        /* --- Premium Frosted Glassmorphism Override (Swirling Liquid Card Style) --- */
+        .feature-card, .customizer-panel, .feedback-card, .review-form-card, .creator-card {
+            background: rgba(255, 255, 255, 0.04) !important;
+            backdrop-filter: blur(35px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(35px) saturate(200%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.09) !important;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            border-radius: 24px !important;
+        }
+
+        .feature-card:hover, .feedback-card:hover, .creator-card:hover {
+            border-color: rgba(255, 255, 255, 0.25) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            transform: translateY(-8px) scale(1.02) !important;
+            box-shadow: 0 40px 80px rgba(255, 0, 128, 0.15), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        /* Premium customizer panel specific shadows */
+        .customizer-panel {
+            box-shadow: 0 30px 80px rgba(139, 92, 246, 0.1), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Abstract Fluid Gradient Background (Liquid Motion) -->
+    <div class="fluid-bg">
+        <div class="fluid-blob blob-purple"></div>
+        <div class="fluid-blob blob-teal"></div>
+        <div class="fluid-blob blob-magenta"></div>
+        <div class="fluid-blob blob-indigo"></div>
+        <!-- Grain Overlay -->
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.03; pointer-events: none; mix-blend-mode: overlay;">
+            <filter id="noiseFilter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+            </filter>
+            <rect width="100%" height="100%" filter="url(#noiseFilter)"/>
+        </svg>
+    </div>
+
+    <nav>
+        <a href="/" class="logo"><img src="favicon.png?v=2" alt="AlgoSync Logo" style="width: 40px; height: 40px; border-radius: 8px;"> AlgoSync</a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How it Works</a></li>
+            <li><a href="#platforms">Platforms</a></li>
+            <li><a href="#card-generator">Card Generator</a></li>
+            <li><a href="#feedback">Feedback</a></li>
+            <li><a href="#reviews">Reviews</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge"><i class="fab fa-chrome" style="color: #4285f4; margin-right: 6px;"></i> Chrome Extension | v1.0.0 Now Available</div>
+        <h1>Your DSA Portfolio, <span class="gradient-text">Automated.</span></h1>
+        <p>AlgoSync is a powerful, lightweight **Chrome Extension** that seamlessly synchronizes your LeetCode, GFG, and HackerRank solutions directly to your GitHub. Build a stunning professional profile while you code.</p>
+        <a href="#how-it-works" class="btn-nav" style="padding: 1.2rem 3rem; font-size: 1.1rem;"><i class="fab fa-chrome" style="margin-right: 8px;"></i> Add to Chrome — It's Free</a>
+        <br>
+        <a href="#creator" class="creator-badge">
+            <img src="/developer.png?v=1" alt="Abhay Varshit">
+            Developed by Abhay Varshit
+        </a>
+        
+
+    </section>
+
+    <section class="features" id="features">
+        <div class="section-title">
+            <h2>Everything you need to grow.</h2>
+            <p style="color: var(--text-muted)">Built by developers, for developers.</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fas fa-bolt"></i>
+                <h3>Seamless Auto-Sync</h3>
+                <p>The moment you pass all test cases on LeetCode or GFG, your solution is instantly committed to your GitHub repository. No manual pushes required.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Secure Firebase Auth</h3>
+                <p>Unlike other extensions, we never store your GitHub tokens locally. We use Google Firebase for enterprise-grade OAuth security and reliability.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-id-card"></i>
+                <h3>Portfolio Card Generator</h3>
+                <p>Automatically generate a stunning, 3D-interactive statistics card highlighting your streak, total solves, and difficulty breakdown to share on LinkedIn.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE REVIEWS SECTION -->
+    <section class="live-reviews-section" id="reviews" style="padding: 4rem 10%; background: rgba(139, 92, 246, 0.03); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="section-title" style="margin-bottom: 3rem;">
+            <h2>Community Reviews</h2>
+            <p style="color: var(--text-muted)">See what developers are saying about AlgoSync.</p>
+        </div>
+        <!-- Horizontal or wrap list of reviews -->
+        <div class="reviews-list" id="reviews-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; max-height: none; overflow-y: visible;">
+            <div style="text-align: center; color: var(--text-muted); margin-top: 2rem; grid-column: 1 / -1;">Loading reviews...</div>
+        </div>
+    </section>
+
+    <section class="features" id="how-it-works" style="background: var(--bg); padding: 8rem 10%;">
+        <div class="section-title">
+            <h2>How it Works</h2>
+            <p style="color: var(--text-muted)">Three simple steps to automate your portfolio.</p>
+        </div>
+        <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-download"></i></div>
+                <h3>1. Install Extension</h3>
+                <p>Add AlgoSync to your Chrome browser in one click. No complex setup or local environment required.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fab fa-github"></i></div>
+                <h3>2. Connect GitHub</h3>
+                <p>Securely authenticate with your GitHub account using our built-in Firebase OAuth integration.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                <h3>3. Solve & Sync</h3>
+                <p>Solve problems on LeetCode or GFG. AlgoSync automatically catches your successful submissions and pushes the code straight to your repo!</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="platforms" style="background: rgba(139, 92, 246, 0.02); padding-bottom: 10rem;">
+        <div class="section-title">
+            <h2>Supported Platforms</h2>
+            <p style="color: var(--text-muted)">Sync across the most popular coding sites.</p>
+        </div>
+        <div class="feature-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); max-width: 900px; margin: 0 auto;">
+            <div class="feature-card" style="text-align: center;">
+                <i class="fas fa-code"></i>
+                <h3>LeetCode</h3>
+            </div>
+            <div class="feature-card" style="text-align: center;">
+                <i class="fas fa-terminal"></i>
+                <h3>GeeksforGeeks</h3>
+            </div>
+            <div class="feature-card" style="text-align: center;">
+                <i class="fas fa-keyboard"></i>
+                <h3>HackerRank</h3>
+            </div>
+        </div>
+    </section>
+
+    <section class="share-card-section" id="card-generator">
+        <div class="section-title">
+            <h2>🏆 Create Your Achievements Badge</h2>
+            <p style="color: var(--text-muted)">Customize, interact, and download a beautiful image to share on LinkedIn or Twitter!</p>
+        </div>
+        
+        <div class="share-container">
+            <!-- LEFT COLUMN: Customizer Controls -->
+            <div class="customizer-panel">
+                <div class="control-group">
+                    <label class="control-label">Your Name</label>
+                    <input type="text" id="card-name-input" class="control-input" value="Abhay Varshit" placeholder="Enter your name">
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Repository Locked</label>
+                    <input type="text" id="card-repo-input" class="control-input" value="ABHAY-AVA2005/AlgoSync" placeholder="Enter GitHub repo">
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Card Theme</label>
+                    <div class="theme-selector">
+                        <div class="theme-option theme-midnight active" data-theme="midnight">Midnight</div>
+                        <div class="theme-option theme-toxic" data-theme="toxic">Toxic</div>
+                        <div class="theme-option theme-solar" data-theme="solar">Solar</div>
+                    </div>
+                </div>
+                
+                <div class="grid-inputs">
+                    <div class="control-group">
+                        <label class="control-label">Easy Solved</label>
+                        <input type="number" id="card-easy-input" class="control-input" value="12">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Medium Solved</label>
+                        <input type="number" id="card-medium-input" class="control-input" value="18">
+                    </div>
+                </div>
+
+                <div class="grid-inputs">
+                    <div class="control-group">
+                        <label class="control-label">Hard Solved</label>
+                        <input type="number" id="card-hard-input" class="control-input" value="6">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Total Solved</label>
+                        <input type="text" id="card-total-input" class="control-input" value="36" readonly style="opacity: 0.6; cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div class="grid-inputs">
+                    <div class="control-group">
+                        <label class="control-label">Daily Streak</label>
+                        <input type="number" id="card-streak-input" class="control-input" value="8">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Streak Started</label>
+                        <input type="text" id="card-date-input" class="control-input" value="5/12/2026">
+                    </div>
+                </div>
+
+                <button id="btn-download" class="btn-download">
+                    <i class="fas fa-download"></i> Download High-Res Card
+                </button>
+            </div>
+            
+            <!-- RIGHT COLUMN: 3D Interactive Live Preview Card -->
+            <div class="card-preview-wrapper">
+                <div id="card-preview" class="share-card-preview theme-midnight" style="background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #0d0d12 100%);">
+                    <div class="card-header">
+                        <div class="card-user-info">
+                            <span id="preview-name" class="card-user-name">Abhay Varshit</span>
+                            <span id="preview-repo" class="card-user-repo">ABHAY-AVA2005/AlgoSync</span>
+                        </div>
+                        <span class="card-logo"><i class="fas fa-bolt"></i> AlgoSync</span>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-stats">
+                            <span id="preview-total" class="card-total-val">36</span>
+                            <span class="card-total-label">Total<br>Solved</span>
+                        </div>
+                        
+                        <div class="card-streak">
+                            <i class="fas fa-fire"></i>
+                            <div class="card-streak-details">
+                                <span id="preview-streak" class="card-streak-val">8 Days</span>
+                                <span id="preview-date" class="card-streak-start">Since 5/12/2026</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-meta-distributions">
+                            <div class="card-meta-item">
+                                <div class="card-meta-dot easy"></div>
+                                <span id="preview-easy">12 Easy</span>
+                            </div>
+                            <div class="card-meta-item">
+                                <div class="card-meta-dot medium"></div>
+                                <span id="preview-medium">18 Medium</span>
+                            </div>
+                            <div class="card-meta-item">
+                                <div class="card-meta-dot hard"></div>
+                                <span id="preview-hard">6 Hard</span>
+                            </div>
+                        </div>
+                        <span class="card-brand">algosync.dev</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const cardNameInput = document.getElementById('card-name-input');
+        const cardRepoInput = document.getElementById('card-repo-input');
+        const cardTotalInput = document.getElementById('card-total-input');
+        const cardEasyInput = document.getElementById('card-easy-input');
+        const cardMediumInput = document.getElementById('card-medium-input');
+        const cardHardInput = document.getElementById('card-hard-input');
+        const cardStreakInput = document.getElementById('card-streak-input');
+        const cardDateInput = document.getElementById('card-date-input');
+
+        const cardPreview = document.getElementById('card-preview');
+        const previewName = document.getElementById('preview-name');
+        const previewRepo = document.getElementById('preview-repo');
+        const previewTotal = document.getElementById('preview-total');
+        const previewEasy = document.getElementById('preview-easy');
+        const previewMedium = document.getElementById('preview-medium');
+        const previewHard = document.getElementById('preview-hard');
+        const previewStreak = document.getElementById('preview-streak');
+        const previewDate = document.getElementById('preview-date');
+        const btnDownload = document.getElementById('btn-download');
+
+        let currentTheme = 'midnight';
+
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                
+                const theme = option.getAttribute('data-theme');
+                cardPreview.className = `share-card-preview theme-${theme}`;
+                currentTheme = theme;
+                
+                if (theme === 'toxic') {
+                    cardPreview.style.background = 'linear-gradient(135deg, #022c22 0%, #020617 100%)';
+                    cardPreview.style.borderColor = 'rgba(52, 211, 153, 0.2)';
+                } else if (theme === 'solar') {
+                    cardPreview.style.background = 'linear-gradient(135deg, #451a03 0%, #1e1b4b 100%)';
+                    cardPreview.style.borderColor = 'rgba(251, 146, 60, 0.2)';
+                } else {
+                    cardPreview.style.background = 'linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #0d0d12 100%)';
+                    cardPreview.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                }
+            });
+        });
+
+        const updatePreview = () => {
+            const nameVal = cardNameInput.value.trim() || 'Abhay Varshit';
+            const repoVal = cardRepoInput.value.trim() || 'ABHAY-AVA2005/AlgoSync';
+            const easyVal = parseInt(cardEasyInput.value) || 0;
+            const medVal = parseInt(cardMediumInput.value) || 0;
+            const hardVal = parseInt(cardHardInput.value) || 0;
+            const totalVal = easyVal + medVal + hardVal;
+            
+            cardTotalInput.value = totalVal;
+
+            const streakVal = cardStreakInput.value.trim() || '0';
+            const dateVal = cardDateInput.value.trim() || new Date().toLocaleDateString();
+
+            previewName.innerText = nameVal;
+            previewRepo.innerText = repoVal;
+            previewTotal.innerText = totalVal;
+            previewEasy.innerText = `${easyVal} Easy`;
+            previewMedium.innerText = `${medVal} Medium`;
+            previewHard.innerText = `${hardVal} Hard`;
+            previewStreak.innerText = `${streakVal} Days`;
+            previewDate.innerText = `Since ${dateVal}`;
+        };
+
+        [cardNameInput, cardRepoInput, cardEasyInput, cardMediumInput, cardHardInput, cardStreakInput, cardDateInput].forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        cardPreview.addEventListener('mousemove', (e) => {
+            const rect = cardPreview.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const xc = rect.width / 2;
+            const yc = rect.height / 2;
+            
+            const angleX = -(y - yc) / 10;
+            const angleY = (x - xc) / 10;
+            
+            cardPreview.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+        });
+
+        cardPreview.addEventListener('mouseleave', () => {
+            cardPreview.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        });
+
+        btnDownload.addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1200;
+            canvas.height = 630;
+            const ctx = canvas.getContext('2d');
+
+            let grad;
+            if (currentTheme === 'toxic') {
+                grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                grad.addColorStop(0, '#022c22');
+                grad.addColorStop(1, '#020617');
+            } else if (currentTheme === 'solar') {
+                grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                grad.addColorStop(0, '#451a03');
+                grad.addColorStop(1, '#1e1b4b');
+            } else {
+                grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                grad.addColorStop(0, '#1e1b4b');
+                grad.addColorStop(0.5, '#311042');
+                grad.addColorStop(1, '#0d0d12');
+            }
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'rgba(139, 92, 246, 0.15)';
+            ctx.beginPath();
+            ctx.arc(canvas.width, 0, 400, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            ctx.shadowBlur = 40;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 20;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+            const cardX = 100;
+            const cardY = 80;
+            const cardW = 1000;
+            const cardH = 470;
+            const cardRadius = 32;
+
+            drawRoundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 2;
+            drawRoundRect(ctx, cardX, cardY, cardW, cardH, cardRadius);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 48px Outfit, sans-serif';
+            ctx.fillText(cardNameInput.value.trim() || 'Abhay Varshit', cardX + 60, cardY + 100);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.font = '500 24px monospace';
+            ctx.fillText(cardRepoInput.value.trim() || 'ABHAY-AVA2005/AlgoSync', cardX + 60, cardY + 140);
+
+            ctx.fillStyle = '#8b5cf6';
+            ctx.font = '800 36px Outfit, sans-serif';
+            ctx.fillText('⚡ AlgoSync', cardX + cardW - 280, cardY + 100);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 130px Outfit, sans-serif';
+            const totalText = cardTotalInput.value;
+            ctx.fillText(totalText, cardX + 60, cardY + 320);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.font = '700 22px Outfit, sans-serif';
+            ctx.fillText('TOTAL SOLVED PROBLEMS', cardX + 60, cardY + 360);
+
+            const streakW = 280;
+            const streakH = 100;
+            const streakX = cardX + cardW - streakW - 60;
+            const streakY = cardY + 200;
+            const streakRadius = 24;
+
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.08)';
+            ctx.strokeStyle = 'rgba(249, 115, 22, 0.3)';
+            ctx.lineWidth = 1.5;
+            drawRoundRect(ctx, streakX, streakY, streakW, streakH, streakRadius);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#fb923c';
+            ctx.font = '800 30px Outfit, sans-serif';
+            ctx.fillText('🔥 ' + cardStreakInput.value + ' Days', streakX + 30, streakY + 45);
+
+            ctx.fillStyle = 'rgba(251, 146, 60, 0.8)';
+            ctx.font = '600 18px Outfit, sans-serif';
+            ctx.fillText('SINCE ' + cardDateInput.value, streakX + 30, streakY + 75);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.fillRect(cardX, cardY + 395, cardW, 2);
+
+            ctx.fillStyle = '#34d399';
+            ctx.beginPath();
+            ctx.arc(cardX + 70, cardY + 432, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.font = '700 18px Outfit, sans-serif';
+            ctx.fillText(cardEasyInput.value + ' Easy', cardX + 90, cardY + 438);
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(cardX + 230, cardY + 432, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillText(cardMediumInput.value + ' Medium', cardX + 250, cardY + 438);
+
+            ctx.fillStyle = '#f87171';
+            ctx.beginPath();
+            ctx.arc(cardX + 410, cardY + 432, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillText(cardHardInput.value + ' Hard', cardX + 430, cardY + 438);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.font = '700 16px Outfit, sans-serif';
+            ctx.fillText('ALGOSYNC.DEV PORTFOLIO CARD', cardX + cardW - 350, cardY + 438);
+
+            const link = document.createElement('a');
+            link.download = 'algosync_stats_card.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        function drawRoundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        updatePreview();
+    </script>
+
+    <section class="feedback-section" id="feedback">
+        <div class="section-title">
+            <h2>Get in Touch & Leave a Review</h2>
+            <p style="color: var(--text-muted)">Help us improve AlgoSync, or leave a review to be featured on our page!</p>
+        </div>
+        
+        <div class="reviews-container">
+            <!-- Left Side: Feedback & Support -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="feedback-card">
+                    <i class="fas fa-bug"></i>
+                    <h3>Report an Issue</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.95rem;">Found a bug or encountering an error? Let us know so we can squash it immediately.</p>
+                    <a href="mailto:abhayvarshit2005@gmail.com?subject=AlgoSync%20Bug%20Report" class="btn-outline">Submit Bug Report</a>
+                </div>
+                <div class="feedback-card">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Suggest Upgrades</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.95rem;">Have a brilliant idea for a new feature? We'd love to hear what you want next.</p>
+                    <a href="mailto:abhayvarshit2005@gmail.com?subject=AlgoSync%20Feature%20Request" class="btn-outline">Request Feature</a>
+                </div>
+            </div>
+
+            <!-- Right Side: Review Form -->
+            <div class="review-form-card">
+                <h3>Leave a Review</h3>
+                <form id="review-form">
+                    <div class="form-group">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" id="review-name" class="form-input" placeholder="e.g., John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Email</label>
+                        <input type="email" id="review-email" class="form-input" placeholder="e.g., john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rating</label>
+                        <div class="rating-group" id="star-rating">
+                            <button type="button" class="star-btn" data-value="1"><i class="fas fa-star"></i></button>
+                            <button type="button" class="star-btn" data-value="2"><i class="fas fa-star"></i></button>
+                            <button type="button" class="star-btn" data-value="3"><i class="fas fa-star"></i></button>
+                            <button type="button" class="star-btn" data-value="4"><i class="fas fa-star"></i></button>
+                            <button type="button" class="star-btn" data-value="5"><i class="fas fa-star"></i></button>
+                        </div>
+                        <input type="hidden" id="review-rating" value="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Review</label>
+                        <textarea id="review-text" class="form-input" placeholder="What do you think about AlgoSync?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-outline" style="width: 100%; border-radius: 8px;" id="submit-review-btn">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="creator-section" id="creator">
+        <div class="section-title">
+            <h2>Meet the Creator</h2>
+            <p style="color: var(--text-muted)">Driven by a passion for open-source and developer productivity.</p>
+        </div>
+        <div class="creator-card">
+            <img src="/developer.png?v=1" alt="Abhay Varshit" class="creator-img">
+            <h3 class="creator-name">Abhay Varshit</h3>
+            <p class="creator-role">Software Engineer</p>
+            <div class="creator-socials">
+                <a href="https://github.com/ABHAY-AVA2005" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://www.linkedin.com/in/abhay-varshit-ava-9242a1286/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="https://my-portfolio-peach-phi-80.vercel.app/" target="_blank" title="Portfolio"><i class="fas fa-globe"></i></a>
+            </div>
+            <a href="mailto:abhayvarshit2005@gmail.com" class="creator-email">
+                <i class="fas fa-envelope"></i> abhayvarshit2005@gmail.com
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <a href="#" class="footer-logo"><img src="/favicon.png?v=3" alt="AlgoSync Logo" style="width: 24px; height: 24px; border-radius: 4px; vertical-align: middle; margin-right: 8px;">AlgoSync</a>
+        <ul class="footer-links">
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">GitHub</a></li>
+        </ul>
+        <p class="copyright">&copy; 2026 AlgoSync. Made with ❤️ for the Developer Community.</p>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyClvcVSi8vckZ9Q4wE2ZORG-SMIRWgUJwE",
+            authDomain: "algosync-a537d.firebaseapp.com",
+            projectId: "algosync-a537d",
+            storageBucket: "algosync-a537d.firebasestorage.app",
+            messagingSenderId: "474986229246",
+            appId: "1:474986229246:web:8f77b351414cefdbd464af",
+            measurementId: "G-QNWL1GL255"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // Star Rating Logic
+        const stars = document.querySelectorAll('.star-btn');
+        const ratingInput = document.getElementById('review-rating');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const value = parseInt(star.getAttribute('data-value'));
+                ratingInput.value = value;
+                stars.forEach(s => {
+                    if (parseInt(s.getAttribute('data-value')) <= value) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            });
+        });
+
+        // Submit Review Logic
+        const reviewForm = document.getElementById('review-form');
+        const submitBtn = document.getElementById('submit-review-btn');
+
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('review-name').value.trim();
+            const email = document.getElementById('review-email').value.trim();
+            const text = document.getElementById('review-text').value.trim();
+            const rating = parseInt(ratingInput.value);
+
+            if (!name || !email || !text || rating === 0) {
+                alert('Please fill out all fields and select a star rating.');
+                return;
+            }
+
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                await db.collection('reviews').add({
+                    name: name,
+                    email: email,
+                    rating: rating,
+                    text: text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                reviewForm.reset();
+                ratingInput.value = 0;
+                stars.forEach(s => s.classList.remove('active'));
+                alert('Review submitted successfully! Thank you!');
+            } catch (error) {
+                console.error('Error adding review:', error);
+                alert('Failed to submit review. Check console for details. (Ensure Firestore rules allow writes).');
+            } finally {
+                submitBtn.textContent = 'Submit Review';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Fetch Reviews Real-time
+        const reviewsList = document.getElementById('reviews-list');
+        
+        db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+            if (snapshot.empty) {
+                reviewsList.innerHTML = '<div style="text-align: center; color: var(--text-muted); margin-top: 2rem;">No reviews yet. Be the first to leave one!</div>';
+                return;
+            }
+            
+            let html = '';
+            snapshot.forEach(doc => {
+                const review = doc.data();
+                const date = review.timestamp ? review.timestamp.toDate().toLocaleDateString() : 'Just now';
+                
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    starsHtml += i <= review.rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                }
+
+                html += `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="review-author">${review.name}</div>
+                            <div class="review-stars">${starsHtml}</div>
+                        </div>
+                        <div class="review-text">"${review.text}"</div>
+                        <div class="review-date">${date}</div>
+                    </div>
+                `;
+            });
+            reviewsList.innerHTML = html;
+        }, (error) => {
+            console.error('Error fetching reviews:', error);
+            reviewsList.innerHTML = '<div style="text-align: center; color: var(--text-muted); margin-top: 2rem;">Could not load reviews. Check Firestore rules.</div>';
+        });
+
+    </script>
+</body>
+</html>

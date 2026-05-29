@@ -1,74 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoSync Dashboard</title>
   <link rel="stylesheet" href="popup.css">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-<body>
-  <div class="container">
-    <header>
-      <div class="logo">
-        <img src="assets/AlgoSync extension logo.png" alt="AlgoSync Logo" class="logo-img">
-        <h1>AlgoSync</h1>
+<body data-theme="dark">
+  <!-- AUTH VIEW -->
+  <div id="auth-view" class="auth-view hidden">
+    <img src="assets/AlgoSync extension logo.png" class="auth-icon" alt="AlgoSync">
+    <h2 class="title" style="margin-bottom: 12px;">Welcome to AlgoSync</h2>
+    <p class="auth-desc">Your DSA Portfolio, Automated.<br>Connect your GitHub to get started.</p>
+    <button id="login-btn" class="primary-btn">Connect GitHub Account</button>
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+  <div id="dashboard-view">
+    <header class="header">
+      <div class="logo-group">
+        <img src="assets/AlgoSync extension logo.png" class="logo-icon" alt="A">
+        <span class="title">AlgoSync</span>
       </div>
-      <div class="status-indicator" id="auth-status">
-        <span class="dot red"></span>
-        <span class="status-text">Disconnected</span>
-      </div>
+      <button id="theme-toggle" class="theme-toggle" title="Toggle Light/Dark Mode">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
     </header>
 
-    <main id="auth-view" class="view">
-      <div class="hero">
-        <h2>Link your GitHub</h2>
-        <p>Sync your solutions automatically to your repositories.</p>
+    <div class="status-bar">
+      <div class="connected-tag">
+        <span class="pulse-dot"></span>
+        Connected to GitHub
       </div>
-      <button id="btn-login" class="btn-primary">
-        <img src="assets/github.svg" alt="" class="btn-icon">
-        Connect GitHub
-      </button>
-    </main>
-
-    <main id="dashboard-view" class="view hidden">
-      <div class="repo-section">
-        <label for="repo-select">Target Repository</label>
-        <div class="custom-select">
-          <select id="repo-select">
-            <option value="" disabled selected>Select a repository</option>
-          </select>
+      <div class="streak-badge" id="streak-badge" title="Daily Coding Streak!">
+        <span class="streak-icon">🔥</span>
+        <div class="streak-details">
+          <span id="streak-text" class="streak-text">0 Days</span>
+          <span id="streak-start-text" class="streak-start-text">Start one today!</span>
         </div>
       </div>
+    </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-value" id="stat-total">0</span>
-          <span class="stat-label">Total</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="stat-easy">0</span>
-          <span class="stat-label" style="color: var(--green)">Easy</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="stat-medium">0</span>
-          <span class="stat-label" style="color: #fbbf24">Med</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-value" id="stat-hard">0</span>
-          <span class="stat-label" style="color: var(--red)">Hard</span>
+    <div class="repo-section" id="repo-section">
+      <label class="section-label">Target Repository</label>
+      <div class="input-wrapper">
+        <input type="text" id="repo-input" placeholder="select or type repository" autocomplete="off">
+        <div id="repo-toggle" class="repo-toggle" title="Show repositories">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
       </div>
+      <div id="repo-dropdown" class="dropdown"></div>
+    </div>
 
-      <div class="actions">
-        <button id="btn-unlink" class="btn-secondary">Unlink GitHub</button>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value total-val" id="stat-total">0</div>
+        <div class="stat-label">Total Solved</div>
       </div>
-    </main>
+      <div class="stat-card">
+        <div class="stat-value easy-val" id="stat-easy">0</div>
+        <div class="stat-label">Easy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value med-val" id="stat-medium">0</div>
+        <div class="stat-label">Medium</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value hard-val" id="stat-hard">0</div>
+        <div class="stat-label">Hard</div>
+      </div>
+    </div>
 
-    <footer>
-      <p>Made with ❤️ for LeetCoders</p>
+    <button id="sync-btn" class="primary-btn">Submit & Start Syncing</button>
+    <button id="open-repo-btn" class="secondary-btn" style="margin-bottom: 8px;">View on GitHub</button>
+    <button id="logout-btn" class="secondary-btn">Unlink Account</button>
+
+    <footer class="footer">
+      <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 12px;">
+        <span id="open-history" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">View History</span>
+        <span id="clear-stats" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Clear History</span>
+        <span id="open-website" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Website</span>
+      </div>
+      <div>Made with <span class="heart">❤️</span> for LeetCoders</div>
     </footer>
   </div>
+
+  <!-- SYNC HISTORY / DEDUPLICATE OVERLAY -->
+  <div id="solved-list-container" class="solved-list-container hidden">
+    <div class="solved-list-header">
+      <h3>Sync History</h3>
+      <button id="close-solved-list" class="close-btn">&times;</button>
+    </div>
+    <div class="solved-list-actions">
+      <button id="dedup-btn" class="dedup-btn" title="Clean duplicates and fix counts">✨ Clean Duplicates</button>
+    </div>
+    <div class="solved-list-search-wrapper">
+      <input type="text" id="solved-list-search" placeholder="Search solved problems...">
+    </div>
+    <div id="solved-list" class="solved-list"></div>
+  </div>
+
+  <script src="storage-helper.js"></script>
+  <script src="firestore-helper.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
