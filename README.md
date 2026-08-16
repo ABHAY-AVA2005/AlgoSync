@@ -3,7 +3,10 @@
 **Your DSA Portfolio, Automated.**  
 AlgoSync is a premium Chrome Extension designed to help developers build a professional coding portfolio effortlessly. It automatically synchronizes your solutions from **LeetCode**, **GeeksforGeeks**, and **HackerRank** directly to your GitHub repository in a clean, structured format.
 
----
+(The exntesion is not yet made public since it requires payment, but can be used locally)
+--
+
+Deployment Link:https://algosync-a537d.web.app/
 
 ## 🚀 Quick Start Guide (Setup in 60 Seconds)
 
