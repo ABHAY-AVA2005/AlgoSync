@@ -50,7 +50,31 @@ const AlgoStorage = {
    * Clears all user data (called on logout).
    */
   async clearUser() {
-    await chrome.storage.local.remove('user');
+    await chrome.storage.local.remove(['user', 'authSession']);
+  },
+
+  /**
+   * Saves the auth provider used to sign in the user (github | google).
+   */
+  async setAuthProvider(provider) {
+    const authSession = await this.getAuthSession();
+    await chrome.storage.local.set({ authSession: { ...authSession, provider } });
+  },
+
+  /**
+   * Returns the persisted auth session metadata such as provider and account email.
+   */
+  async getAuthSession() {
+    const { authSession } = await chrome.storage.local.get('authSession');
+    return authSession || { provider: 'github' };
+  },
+
+  /**
+   * Stores extra metadata from the login flow so it survives extension reloads.
+   */
+  async saveAuthSession(session = {}) {
+    const authSession = await this.getAuthSession();
+    await chrome.storage.local.set({ authSession: { ...authSession, ...session } });
   },
 
   // ─── SETTINGS (sync — preferences follow user across devices) ───────────

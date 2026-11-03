@@ -26,6 +26,7 @@ firebase.initializeApp(firebaseConfig);
   // The popup.js passes its ID so we know exactly where to beam the token back to.
   const urlParams = new URLSearchParams(window.location.search);
   const extId = urlParams.get('extId');
+  const providerName = (urlParams.get('provider') || 'github').toLowerCase();
   const container = document.getElementById('message-container');
 
   if (!extId) {
@@ -36,35 +37,53 @@ firebase.initializeApp(firebaseConfig);
     return;
   }
 
-  // 3. Setup the Login Button
+  const providerLabel = providerName === 'google' ? 'Google' : 'GitHub';
   const loginBtn = document.getElementById('login-btn');
   if (!loginBtn) return;
 
+  const labelText = providerName === 'google' ? 'Continue with Google' : 'Proceed to GitHub';
+  loginBtn.innerText = labelText;
+
   loginBtn.addEventListener('click', async () => {
-    loginBtn.innerText = "Connecting to GitHub...";
+    loginBtn.innerText = providerName === 'google' ? 'Connecting to Google...' : 'Connecting to GitHub...';
     loginBtn.disabled = true;
 
     try {
-      // 4. Trigger Firebase GitHub OAuth
-      const provider = new firebase.auth.GithubAuthProvider();
-      provider.addScope('repo'); // We need 'repo' scope to push code to GitHub
-      
-      const result = await firebase.auth().signInWithPopup(provider);
-      
-      // Extract the OAuth Access Token from the v8 Compat result object
-      const token = result.credential ? result.credential.accessToken : null;
+      const auth = firebase.auth();
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-      if (!token) {
+      let provider;
+      let requiredTokenField = 'accessToken';
+
+      if (providerName === 'google') {
+        provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('profile');
+        provider.addScope('email');
+      } else {
+        provider = new firebase.auth.GithubAuthProvider();
+        provider.addScope('repo');
+      }
+
+      const result = await auth.signInWithPopup(provider);
+      const token = result.credential ? result.credential[requiredTokenField] : null;
+      const user = result.user;
+
+      if (!token && providerName === 'github') {
         throw new Error("GitHub did not provide an access token.");
       }
 
-      // 5. Success - Beam Token Back to Extension
       container.innerHTML = `
         <h2 style="color: #2ea043;">Success!</h2>
-        <p>GitHub connected successfully. Sending data back to extension...</p>
+        <p>${providerLabel} connected successfully. Sending data back to extension...</p>
       `;
 
-      chrome.runtime.sendMessage(extId, { action: 'login_success', token: token }, (response) => {
+      chrome.runtime.sendMessage(extId, {
+        action: 'login_success',
+        token: token || '',
+        provider: providerName,
+        userEmail: user ? user.email : '',
+        userName: user ? user.displayName : ''
+      }, (response) => {
         if (chrome.runtime.lastError) {
           console.error(chrome.runtime.lastError);
           container.innerHTML = `
@@ -72,20 +91,18 @@ firebase.initializeApp(firebaseConfig);
             <p>Could not communicate with the extension. Make sure it is installed and active.</p>
           `;
         } else {
-          // Mission accomplished, auto-close the auth tab
           window.close();
         }
       });
-      
+
     } catch (error) {
       console.error("Auth Error:", error);
-      
-      // 6. Handle Popup Blockers explicitly for better UX
+
       if (error.code === 'auth/popup-blocked') {
         container.innerHTML = `
           <h2 style="color: #ff4444;">Popup Blocked</h2>
-          <p>Your browser blocked the GitHub login window.</p>
-          <p><strong>Please click the "Pop-up blocked" icon in your address bar (or check your browser settings) and select "Always allow pop-ups for this site", then refresh this page to try again.</strong></p>
+          <p>Your browser blocked the ${providerLabel} login window.</p>
+          <p><strong>Please click the "Pop-up blocked" icon in your address bar and allow pop-ups for this site, then refresh.</strong></p>
         `;
       } else {
         container.innerHTML = `
@@ -94,9 +111,8 @@ firebase.initializeApp(firebaseConfig);
           <p>You can safely close this tab and try again.</p>
         `;
       }
-      
-      // Reset button just in case they want to retry without refreshing
-      loginBtn.innerText = "Proceed to GitHub";
+
+      loginBtn.innerText = labelText;
       loginBtn.disabled = false;
     }
   });

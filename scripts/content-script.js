@@ -132,16 +132,70 @@
     return title;
   }
 
+  function normalizeDifficulty(rawDifficulty) {
+    const value = String(rawDifficulty || '').trim();
+    if (!value) return 'Medium';
+
+    const normalized = value.toLowerCase().replace(/[_\-\s]+/g, ' ');
+    if (/(easy|basic|beginner)/.test(normalized)) return 'Easy';
+    if (/(medium|moderate|intermediate)/.test(normalized)) return 'Medium';
+    if (/(hard|difficult|advanced|expert)/.test(normalized)) return 'Hard';
+    return /^easy$/i.test(value) ? 'Easy' : /^hard$/i.test(value) ? 'Hard' : 'Medium';
+  }
+
   function getCleanDifficulty() {
-    const match = document.body.innerText.match(/Difficulty:\s*(\w+)/i);
-    return match ? match[1] : (document.querySelector('.text-olive, .text-yellow, .text-pink')?.innerText.trim() || 'Medium');
+    const pageText = document.body.innerText || '';
+    const explicitMatch = pageText.match(/(?:difficulty|level)\s*[:\-]?\s*([a-zA-Z]+)\b/i);
+    if (explicitMatch) {
+      return normalizeDifficulty(explicitMatch[1]);
+    }
+
+    const difficultyCandidates = Array.from(document.querySelectorAll(
+      '.difficulty, .difficulty-label, .difficulty-value, [class*="difficulty"], [class*="level"], [data-difficulty], .text-olive, .text-yellow, .text-pink'
+    ));
+
+    for (const el of difficultyCandidates) {
+      const text = (el.innerText || el.textContent || '').trim();
+      if (!text) continue;
+      if (/(easy|medium|hard|basic|beginner|intermediate|advanced|expert|difficult)/i.test(text)) {
+        return normalizeDifficulty(text);
+      }
+    }
+
+    return 'Medium';
   }
 
   async function getCleanCode() {
-    const lines = Array.from(document.querySelectorAll('.ace_line, .view-line, .CodeMirror-line')).map(l => l.innerText);
-    if (lines.length > 5) return lines.join('\n');
-    const editor = document.querySelector('.monaco-editor, .ace_editor, .CodeMirror');
-    return editor ? editor.innerText : "Code Scrape Failed";
+    const editorRoots = [
+      document.querySelector('.CodeMirror-code'),
+      document.querySelector('.ace_editor .ace_content'),
+      document.querySelector('.ace_layer'),
+      document.querySelector('.monaco-editor .view-lines'),
+      document.querySelector('.monaco-editor .lines-content'),
+      document.querySelector('.monaco-editor')
+    ].filter(Boolean);
+
+    for (const root of editorRoots) {
+      const lines = Array.from(root.querySelectorAll('.CodeMirror-line, .ace_line, .view-line')).map(node => node.textContent || node.innerText || '');
+      const joined = lines.filter(line => line.trim().length > 0 || lines.length <= 1).join('\n');
+      if (joined && joined.trim().length > 0) {
+        return joined;
+      }
+    }
+
+    const monacoModel = window.monaco && Array.isArray(monaco.editor?.getModels?.()) ? monaco.editor.getModels().find(m => (m.getValue() || '').trim()) : null;
+    if (monacoModel) return monacoModel.getValue();
+
+    const cm = document.querySelector('.CodeMirror');
+    if (cm && typeof cm.CodeMirror?.getValue === 'function') return cm.CodeMirror.getValue();
+
+    const aceEditor = document.querySelector('.ace_editor');
+    if (aceEditor && typeof ace.edit === 'function') {
+      const instance = ace.edit(aceEditor);
+      if (instance && typeof instance.getValue === 'function') return instance.getValue();
+    }
+
+    return "Code Scrape Failed";
   }
 
   function getCleanExtension() {

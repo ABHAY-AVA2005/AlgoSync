@@ -1,4 +1,26 @@
 (async () => {
+  const safeSendMessage = (message, callback) => {
+    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+      console.warn('AlgoSync: runtime unavailable for message', message);
+      if (callback) callback({ success: false, error: 'Extension runtime unavailable' });
+      return;
+    }
+
+    try {
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn('AlgoSync runtime message failed:', chrome.runtime.lastError.message);
+          if (callback) callback({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
+        if (callback) callback(response);
+      });
+    } catch (error) {
+      console.warn('AlgoSync sendMessage threw:', error);
+      if (callback) callback({ success: false, error: error.message });
+    }
+  };
+
   // --- Instant Theme Recovery ---
   const { theme } = await AlgoStorage.getSettings();
   if (theme) {
@@ -6,11 +28,26 @@
     document.body.setAttribute('data-theme', theme);
   }
 
+  const normalizeDifficulty = (rawDifficulty) => {
+    const value = String(rawDifficulty || '').trim();
+    if (!value) return 'Medium';
+    const normalized = value.toLowerCase().replace(/[_\-\s]+/g, ' ');
+    if (/(easy|basic|beginner)/.test(normalized)) return 'Easy';
+    if (/(medium|moderate|intermediate)/.test(normalized)) return 'Medium';
+    if (/(hard|difficult|advanced|expert)/.test(normalized)) return 'Hard';
+    return 'Medium';
+  };
+
   const init = async () => {
     const authView = document.getElementById('auth-view');
     const dashboardView = document.getElementById('dashboard-view');
     const loginBtn = document.getElementById('login-btn');
+    const googleLoginBtn = document.getElementById('google-login-btn');
     const logoutBtn = document.getElementById('logout-btn');
+    const refreshReposBtn = document.getElementById('refresh-repos');
+    const exportDataBtn = document.getElementById('export-data');
+    const importDataBtn = document.getElementById('import-data');
+    const backupFileInput = document.getElementById('backup-file-input');
     const syncBtn = document.getElementById('sync-btn');
     const repoSection = document.getElementById('repo-section');
     const repoInput = document.getElementById('repo-input');
@@ -153,7 +190,7 @@
             if (typeof item === 'string') {
               list[matchIndex] = {
                 name: cleanName,
-                difficulty: difficulty || 'Medium',
+                    difficulty: normalizeDifficulty(difficulty || 'Medium'),
                 platform: platform || 'LeetCode',
                 date: date || new Date().toLocaleDateString()
               };
@@ -161,13 +198,13 @@
             } else if (!item.date || item.date !== date) {
               list[matchIndex].date = date || new Date().toLocaleDateString();
               list[matchIndex].platform = platform || item.platform;
-              list[matchIndex].difficulty = difficulty || item.difficulty;
+                  list[matchIndex].difficulty = normalizeDifficulty(difficulty || item.difficulty || 'Medium');
               updated = true;
             }
           } else {
             list.push({
               name: cleanName,
-              difficulty: difficulty || 'Medium',
+                  difficulty: normalizeDifficulty(difficulty || 'Medium'),
               platform: platform || 'LeetCode',
               date: date || new Date().toLocaleDateString()
             });
@@ -178,7 +215,7 @@
         if (updated) {
           let easy = 0, medium = 0, hard = 0;
           for (const item of list) {
-            const d = (item.difficulty || 'Medium').toLowerCase();
+            const d = normalizeDifficulty(item.difficulty || 'Medium').toLowerCase();
             if (d.includes('easy') || d.includes('basic')) easy++;
             else if (d.includes('medium')) medium++;
             else if (d.includes('hard')) hard++;
@@ -209,12 +246,23 @@
     // --- State Check & Auto-Refetch ---
     const checkState = async () => {
       const { accessToken, selectedRepo } = await AlgoStorage.getUser();
+      const authSession = await AlgoStorage.getAuthSession();
       const { stats, solvedList } = await getFirestoreData();
-      
-      if (accessToken) {
+      const hasGitHubSession = !!accessToken;
+
+      if (hasGitHubSession) {
         authView.classList.add('hidden');
         dashboardView.classList.remove('hidden');
-        
+
+        const connectionStatusText = document.getElementById('connection-status-text');
+        if (accessToken) {
+          connectionStatusText.textContent = 'Connected to GitHub';
+        } else if (authSession && authSession.provider === 'google') {
+          connectionStatusText.textContent = 'Google session saved';
+        } else {
+          connectionStatusText.textContent = 'GitHub not connected';
+        }
+
         const streakData = calculateStreak(solvedList || []);
         document.getElementById('streak-text').innerText = `${streakData.streak} Day${streakData.streak === 1 ? '' : 's'}`;
         if (streakData.streak > 0) {
@@ -222,33 +270,35 @@
         } else {
           document.getElementById('streak-start-text').innerText = 'Start one today!';
         }
-        
+
         // Dynamic background recovery of streak from GitHub repository README.md!
-        syncStreakWithGithub();
+        if (accessToken) {
+          syncStreakWithGithub();
+        }
 
         if (selectedRepo) {
           // Display short repo name but keep full_name in data-full-repo
           repoInput.value = selectedRepo.includes('/') ? selectedRepo.split('/')[1] : selectedRepo;
           repoInput.setAttribute('data-full-repo', selectedRepo);
         } else {
-          // Smart Default: If no repository is locked yet, try to auto-select the most recently updated one
           const { repos } = await AlgoStorage.getUser();
-          if (repos && Array.isArray(repos) && repos.length > 0) {
+          if (accessToken && repos && Array.isArray(repos) && repos.length > 0) {
             const defaultRepo = repos[0].full_name;
             await AlgoStorage.setRepo(defaultRepo);
             repoInput.value = repos[0].name;
             repoInput.setAttribute('data-full-repo', defaultRepo);
           }
         }
-        
+
         const s = stats || { total: 0, easy: 0, medium: 0, hard: 0 };
         document.getElementById('stat-total').innerText = s.total;
         document.getElementById('stat-easy').innerText = s.easy;
         document.getElementById('stat-medium').innerText = s.medium;
         document.getElementById('stat-hard').innerText = s.hard;
 
-        // Auto-refetch repos to keep dropdown fresh
-        chrome.runtime.sendMessage({ action: 'fetchRepos' });
+        if (accessToken) {
+          safeSendMessage({ action: 'fetchRepos' });
+        }
       } else {
         authView.classList.remove('hidden');
         dashboardView.classList.add('hidden');
@@ -316,6 +366,69 @@
         itemDiv.appendChild(badgeSpan);
         repoDropdown.appendChild(itemDiv);
       });
+    };
+
+    const exportBackupData = async () => {
+      try {
+        const user = await AlgoStorage.getUser();
+        const settings = await AlgoStorage.getSettings();
+        const authSession = await AlgoStorage.getAuthSession();
+        const { stats, solvedList } = await getFirestoreData();
+
+        const payload = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          user,
+          authSession,
+          settings,
+          stats,
+          solvedList
+        };
+
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `algosync-backup-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        alert('Backup exported successfully.');
+      } catch (error) {
+        console.error('Export backup failed:', error);
+        alert('Could not export backup: ' + (error.message || 'Unknown error'));
+      }
+    };
+
+    const importBackupData = async (file) => {
+      try {
+        const text = await file.text();
+        const payload = JSON.parse(text);
+        if (!payload || typeof payload !== 'object') {
+          throw new Error('Invalid backup file.');
+        }
+
+        if (payload.user) {
+          await chrome.storage.local.set({ user: payload.user });
+        }
+        if (payload.authSession) {
+          await chrome.storage.local.set({ authSession: payload.authSession });
+        }
+        if (payload.stats) {
+          await chrome.storage.local.set({ stats: payload.stats });
+        }
+        if (Array.isArray(payload.solvedList)) {
+          await chrome.storage.local.set({ solvedList: payload.solvedList });
+        }
+        if (payload.settings) {
+          await chrome.storage.sync.set({ settings: payload.settings });
+        }
+
+        alert('Backup imported successfully.');
+        await checkState();
+      } catch (error) {
+        console.error('Import backup failed:', error);
+        alert('Could not import backup: ' + (error.message || 'Invalid file'));
+      }
     };
 
     const openDropdown = async () => {
@@ -459,12 +572,49 @@
       }
     });
 
+    const openAuthPage = (provider = 'github') => {
+      const cacheBuster = Date.now();
+      const loginUrl = `https://algosync-a537d.web.app/login.html?extId=${chrome.runtime.id}&provider=${encodeURIComponent(provider)}&v=${cacheBuster}`;
+      chrome.tabs.create({ url: loginUrl });
+    };
+
     loginBtn.addEventListener('click', () => {
       loginBtn.innerText = 'Opening Auth...';
       loginBtn.disabled = true;
-      // Add a timestamp cache buster so Chrome NEVER loads a broken cached version of login.html
-      const cacheBuster = Date.now();
-      chrome.tabs.create({ url: `https://algosync-a537d.web.app/login.html?extId=${chrome.runtime.id}&v=${cacheBuster}` });
+      openAuthPage('github');
+      setTimeout(() => {
+        loginBtn.innerText = 'Connect GitHub Account';
+        loginBtn.disabled = false;
+      }, 1200);
+    });
+
+    googleLoginBtn.addEventListener('click', () => {
+      googleLoginBtn.innerText = 'Opening Google...';
+      googleLoginBtn.disabled = true;
+      openAuthPage('google');
+      setTimeout(() => {
+        googleLoginBtn.innerText = 'Continue with Google';
+        googleLoginBtn.disabled = false;
+      }, 1200);
+    });
+
+    refreshReposBtn.addEventListener('click', async () => {
+      const { accessToken } = await AlgoStorage.getUser();
+      if (!accessToken) {
+        alert('Please connect your GitHub account before refreshing repositories.');
+        return;
+      }
+      safeSendMessage({ action: 'fetchRepos' });
+      alert('Repository list refresh started.');
+    });
+
+    exportDataBtn.addEventListener('click', exportBackupData);
+    importDataBtn.addEventListener('click', () => backupFileInput.click());
+    backupFileInput.addEventListener('change', async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      await importBackupData(file);
+      backupFileInput.value = '';
     });
 
     document.getElementById('open-repo-btn').addEventListener('click', async () => {
@@ -541,7 +691,7 @@
       for (let i = list.length - 1; i >= 0; i--) {
         const item = list[i];
         const rawName = typeof item === 'string' ? item : item.name;
-        const difficulty = typeof item === 'string' ? 'Medium' : (item.difficulty || 'Medium');
+        const difficulty = normalizeDifficulty(typeof item === 'string' ? 'Medium' : (item.difficulty || 'Medium'));
         const platform = typeof item === 'string' ? 'LeetCode' : (item.platform || 'LeetCode');
         
         if (query && !rawName.toLowerCase().includes(query) && !platform.toLowerCase().includes(query)) {
@@ -661,7 +811,7 @@
       if (index >= 0 && index < list.length) {
         const item = list[index];
         const rawName = typeof item === 'string' ? item : item.name;
-        const difficulty = typeof item === 'string' ? 'Medium' : (item.difficulty || 'Medium');
+        const difficulty = normalizeDifficulty(typeof item === 'string' ? 'Medium' : (item.difficulty || 'Medium'));
         
         list.splice(index, 1);
         
@@ -680,7 +830,7 @@
         await setFirestoreData(s, list);
         
         // Notify background script to synchronously remove the row from README.md on GitHub!
-        chrome.runtime.sendMessage({ action: 'deleteSolution', payload: { problemName: rawName } });
+        safeSendMessage({ action: 'deleteSolution', payload: { problemName: rawName } });
 
         // Refresh dashboard UI
         document.getElementById('stat-total').innerText = s.total;
@@ -712,7 +862,7 @@
       
       for (const item of list) {
         let rawName = typeof item === 'string' ? item : item.name;
-        let difficulty = typeof item === 'string' ? 'Medium' : (item.difficulty || 'Medium');
+        let difficulty = normalizeDifficulty(typeof item === 'string' ? 'Medium' : (item.difficulty || 'Medium'));
         let platform = typeof item === 'string' ? 'LeetCode' : (item.platform || 'LeetCode');
         
         // Strip out submission identifiers like "Submission #12345" or "Submission _12345"
@@ -740,7 +890,7 @@
       await setFirestoreData(newStats, cleanedList);
       
       // Notify background script to synchronously deduplicate the README.md on GitHub!
-      chrome.runtime.sendMessage({ action: 'deduplicateReadme' });
+      safeSendMessage({ action: 'deduplicateReadme' });
       
       // Update UI dashboard
       document.getElementById('stat-total').innerText = newStats.total;

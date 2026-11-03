@@ -1,14 +1,100 @@
 try {
-  importScripts(
-    'storage-helper.js',
-    'firestore-helper.js'
-  );
+  importScripts('storage-helper.js', 'firestore-helper.js');
 } catch (e) {
-  console.error("Failed to load scripts:", e);
+  console.warn('AlgoSync background fallback import failed:', e);
+}
+
+const fallbackAlgoStorage = {
+  async getUser() {
+    const { user } = await chrome.storage.local.get('user');
+    return user || {};
+  },
+  async setToken(accessToken) {
+    const user = await this.getUser();
+    await chrome.storage.local.set({ user: { ...user, accessToken } });
+  },
+  async setRepo(selectedRepo) {
+    const user = await this.getUser();
+    await chrome.storage.local.set({ user: { ...user, selectedRepo } });
+  },
+  async setRepos(repos) {
+    const user = await this.getUser();
+    await chrome.storage.local.set({ user: { ...user, repos } });
+  },
+  async clearUser() {
+    await chrome.storage.local.remove(['user', 'authSession']);
+  },
+  async setAuthProvider(provider) {
+    const authSession = await this.getAuthSession();
+    await chrome.storage.local.set({ authSession: { ...authSession, provider } });
+  },
+  async getAuthSession() {
+    const { authSession } = await chrome.storage.local.get('authSession');
+    return authSession || { provider: 'github' };
+  },
+  async saveAuthSession(session = {}) {
+    const authSession = await this.getAuthSession();
+    await chrome.storage.local.set({ authSession: { ...authSession, ...session } });
+  },
+  async getSettings() {
+    const { settings } = await chrome.storage.sync.get('settings');
+    return settings || { theme: 'dark' };
+  },
+  async setTheme(theme) {
+    const settings = await this.getSettings();
+    await chrome.storage.sync.set({ settings: { ...settings, theme } });
+  },
+  async migrate() {
+    const local = await chrome.storage.local.get(['accessToken', 'selectedRepo', 'repos']);
+    const sync = await chrome.storage.sync.get(['accessToken', 'selectedRepo', 'theme']);
+    const hasOldData = local.accessToken || local.selectedRepo || local.repos || sync.accessToken || sync.selectedRepo;
+    if (!hasOldData) return;
+
+    const newUser = {
+      accessToken: local.accessToken || sync.accessToken || undefined,
+      selectedRepo: local.selectedRepo || sync.selectedRepo || undefined,
+      repos: local.repos || undefined,
+    };
+    Object.keys(newUser).forEach(k => newUser[k] === undefined && delete newUser[k]);
+
+    const newSettings = { theme: sync.theme || 'dark' };
+    await chrome.storage.local.set({ user: newUser });
+    await chrome.storage.sync.set({ settings: newSettings });
+    await chrome.storage.local.remove(['accessToken', 'selectedRepo', 'repos']);
+    await chrome.storage.sync.remove(['accessToken', 'selectedRepo', 'theme']);
+  }
+};
+
+if (typeof AlgoStorage === 'undefined') {
+  globalThis.AlgoStorage = fallbackAlgoStorage;
+}
+
+if (typeof getFirestoreData === 'undefined') {
+  globalThis.getFirestoreData = async function() {
+    try {
+      const data = await chrome.storage.local.get(['stats', 'solvedList']);
+      return { stats: data.stats || null, solvedList: data.solvedList || [] };
+    } catch (err) {
+      console.error('Storage Read Error:', err);
+      return { stats: null, solvedList: [] };
+    }
+  };
+}
+
+if (typeof setFirestoreData === 'undefined') {
+  globalThis.setFirestoreData = async function(stats, solvedList) {
+    try {
+      await chrome.storage.local.set({ stats, solvedList });
+    } catch (err) {
+      console.error('Storage Write Error:', err);
+    }
+  };
 }
 
 // Run migration on every startup — safe no-op if already migrated
-AlgoStorage.migrate();
+if (typeof AlgoStorage !== 'undefined' && typeof AlgoStorage.migrate === 'function') {
+  AlgoStorage.migrate();
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'pushSolution') { handlePush(request.payload, sendResponse); return true; }
@@ -20,12 +106,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             const repos = await fetchRepos(accessToken);
             if (repos && repos.error === 'Unauthorized') {
                 await AlgoStorage.clearUser();
-                chrome.runtime.sendMessage({ action: 'tokenExpired' }).catch(() => {});
+                sendResponse({ success: false, error: 'tokenExpired' });
             } else if (Array.isArray(repos)) {
                 await AlgoStorage.setRepos(repos);
+                sendResponse({ success: true });
+            } else {
+                sendResponse({ success: true });
             }
+        } else {
+            sendResponse({ success: true });
         }
-        sendResponse({ success: true });
     }).catch(e => {
         console.error("fetchRepos error in background:", e);
         sendResponse({ success: false });
@@ -53,19 +143,53 @@ async function fetchRepos(token) {
 
 // Listen for external messages from the Firebase Hosted login webpage
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
-  if (message && message.action === 'login_success' && message.token) {
-    AlgoStorage.setToken(message.token).then(() => {
-      // Fetch repos to update the UI immediately
-      chrome.runtime.sendMessage({ action: 'fetchRepos' });
-      sendResponse({ success: true });
-    });
+  if (message && message.action === 'login_success' && (message.provider === 'google' || message.provider === 'github')) {
+    const provider = message.provider || 'github';
+    const authSession = {
+      provider,
+      userEmail: message.userEmail || '',
+      userName: message.userName || '',
+      googleToken: provider === 'google' ? (message.token || '') : ''
+    };
+
+    Promise.resolve()
+      .then(() => AlgoStorage.saveAuthSession(authSession))
+      .then(() => AlgoStorage.setAuthProvider(provider))
+      .then(async () => {
+        if (provider === 'github' && message.token) {
+          await AlgoStorage.setToken(message.token);
+          const { accessToken } = await AlgoStorage.getUser();
+          if (accessToken) {
+            const repos = await fetchRepos(accessToken);
+            if (Array.isArray(repos)) {
+              await AlgoStorage.setRepos(repos);
+            }
+          }
+        }
+        sendResponse({ success: true, provider });
+      })
+      .catch((error) => {
+        console.error('login_success persistence error:', error);
+        sendResponse({ success: false, error: error.message || 'Unknown error' });
+      });
     return true;
   }
 });
 
-// SMARTER NORMALIZATION: Ignores line endings and trailing whitespace, but keeps internal formatting
+// SMARTER NORMALIZATION: preserves original code structure and indentation while normalizing line endings.
 function normalizeCode(c) {
-  return c.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').map(l => l.trimEnd()).join('\n').trim();
+  return String(c || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).join('\n');
+}
+
+function normalizeDifficulty(rawDifficulty) {
+  const value = String(rawDifficulty || '').trim();
+  if (!value) return 'Medium';
+
+  const normalized = value.toLowerCase().replace(/[_\-\s]+/g, ' ');
+  if (/(easy|basic|beginner)/.test(normalized)) return 'Easy';
+  if (/(medium|moderate|intermediate)/.test(normalized)) return 'Medium';
+  if (/(hard|difficult|advanced|expert)/.test(normalized)) return 'Hard';
+  return 'Medium';
 }
 
 async function handlePush(payload, sendResponse) {
@@ -74,6 +198,7 @@ async function handlePush(payload, sendResponse) {
 
   try {
     const { platform, difficulty, problemName, code, extension, testCases, description, companyTags, topicTags } = payload;
+    const normalizedDifficulty = normalizeDifficulty(difficulty);
     const platformTag = platform === 'GeeksforGeeks' ? 'GFG' : (platform === 'LeetCode' ? 'LeetCode' : 'HR');
     const folderName = `[${platformTag}] ${problemName.replace(/[^a-z0-9 ]/gi, '_').trim()}`;
     const folderPath = `${folderName}`;
@@ -110,15 +235,15 @@ async function handlePush(payload, sendResponse) {
     const finalCodePath = `${folderPath}/${finalFileName}`;
     const readmePath = `${folderPath}/README.md`;
 
-    const readmeContent = `# ${problemName}\n\n### Difficulty: ${difficulty || 'Medium'}\n\n## Description\n\n${description}\n\n---\n**Company Tags**: ${companyTags}\n**Topic Tags**: ${topicTags}\n\n## Test Cases\n\n\`\`\`\n${testCases}\n\`\`\``;
+    const readmeContent = `# ${problemName}\n\n### Difficulty: ${normalizedDifficulty}\n\n## Description\n\n${description}\n\n---\n**Company Tags**: ${companyTags}\n**Topic Tags**: ${topicTags}\n\n## Test Cases\n\n\`\`\`\n${testCases}\n\`\`\``;
     
     // 3. PUSHING
     await pushToGitHub(selectedRepo, readmePath, readmeContent, accessToken);
     const r2 = await pushToGitHub(selectedRepo, finalCodePath, code, accessToken);
     if (r2.error) throw new Error(r2.error);
 
-    await updateUniqueStats(problemName, difficulty, platform);
-    await updateMasterReadme(selectedRepo, { platform, difficulty, problemName, folderPath, fileName: finalFileName }, accessToken);
+    await updateUniqueStats(problemName, normalizedDifficulty, platform);
+    await updateMasterReadme(selectedRepo, { platform, difficulty: normalizedDifficulty, problemName, folderPath, fileName: finalFileName }, accessToken);
 
     sendResponse({ success: true });
   } catch (error) { 
@@ -155,6 +280,7 @@ async function updateUniqueStats(problemName, difficulty, platform) {
     const { stats, solvedList } = await getFirestoreData();
     const currentStats = stats || { total: 0, easy: 0, medium: 0, hard: 0 };
     const currentList = solvedList || [];
+    const normalizedDifficulty = normalizeDifficulty(difficulty);
     
     const exists = currentList.some(item => {
         if (typeof item === 'string') return item === problemName;
@@ -164,12 +290,12 @@ async function updateUniqueStats(problemName, difficulty, platform) {
     if (!exists) {
         currentList.push({
             name: problemName,
-            difficulty: difficulty || 'Medium',
+            difficulty: normalizedDifficulty,
             platform: platform || 'LeetCode',
             date: new Date().toLocaleDateString()
         });
         currentStats.total++;
-        const d = (difficulty || 'Medium').toLowerCase();
+        const d = normalizedDifficulty.toLowerCase();
         if (d.includes('easy') || d.includes('basic')) currentStats.easy++;
         else if (d.includes('medium')) currentStats.medium++;
         else if (d.includes('hard')) currentStats.hard++;
@@ -282,7 +408,7 @@ async function updateMasterReadme(repo, data, token) {
   parsedRows.push({
     platform: data.platform,
     problem: data.problemName,
-    difficulty: data.difficulty || 'Medium',
+    difficulty: normalizeDifficulty(data.difficulty),
     solution: `[View Code](${data.folderPath}/${data.fileName})`,
     date: dateStr
   });

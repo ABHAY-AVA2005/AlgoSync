@@ -9,8 +9,11 @@
   <div id="auth-view" class="auth-view hidden">
     <img src="assets/AlgoSync extension logo.png" class="auth-icon" alt="AlgoSync">
     <h2 class="title" style="margin-bottom: 12px;">Welcome to AlgoSync</h2>
-    <p class="auth-desc">Your DSA Portfolio, Automated.<br>Connect your GitHub to get started.</p>
-    <button id="login-btn" class="primary-btn">Connect GitHub Account</button>
+    <p class="auth-desc">Your DSA Portfolio, Automated.<br>Continue with Google or connect GitHub.</p>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+      <button id="google-login-btn" class="secondary-btn">Continue with Google</button>
+      <button id="login-btn" class="primary-btn">Connect GitHub Account</button>
+    </div>
   </div>
 
   <!-- MAIN DASHBOARD -->
@@ -26,9 +29,9 @@
     </header>
 
     <div class="status-bar">
-      <div class="connected-tag">
+      <div class="connected-tag" id="connection-status">
         <span class="pulse-dot"></span>
-        Connected to GitHub
+        <span id="connection-status-text">Connected to GitHub</span>
       </div>
       <div class="streak-badge" id="streak-badge" title="Daily Coding Streak!">
         <span class="streak-icon">🔥</span>
@@ -74,14 +77,19 @@
     <button id="logout-btn" class="secondary-btn">Unlink Account</button>
 
     <footer class="footer">
-      <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
         <span id="open-history" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">View History</span>
         <span id="clear-stats" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Clear History</span>
+        <span id="refresh-repos" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Refresh Repos</span>
+        <span id="export-data" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Export</span>
+        <span id="import-data" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Import</span>
         <span id="open-website" style="cursor: pointer; text-decoration: underline; opacity: 0.7;">Website</span>
       </div>
       <div>Made with <span class="heart">❤️</span> for LeetCoders</div>
     </footer>
   </div>
+
+  <input id="backup-file-input" type="file" accept="application/json" hidden />
 
   <!-- SYNC HISTORY / DEDUPLICATE OVERLAY -->
   <div id="solved-list-container" class="solved-list-container hidden">
