@@ -37,6 +37,14 @@ firebase.initializeApp(firebaseConfig);
     return;
   }
 
+  if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+    container.innerHTML = `
+      <h2 style="color: #ff4444;">Use the extension login</h2>
+      <p>This page is only used by the AlgoSync extension. Please open the extension popup and connect from there.</p>
+    `;
+    return;
+  }
+
   const providerLabel = providerName === 'google' ? 'Google' : 'GitHub';
   const loginBtn = document.getElementById('login-btn');
   if (!loginBtn) return;

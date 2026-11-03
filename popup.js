@@ -572,30 +572,82 @@
       }
     });
 
-    const openAuthPage = (provider = 'github') => {
-      const cacheBuster = Date.now();
-      const loginUrl = `https://algosync-a537d.web.app/login.html?extId=${chrome.runtime.id}&provider=${encodeURIComponent(provider)}&v=${cacheBuster}`;
-      chrome.tabs.create({ url: loginUrl });
+    const authenticateWithFirebase = async (providerName = 'github') => {
+      if (!window.firebase || !firebase.auth) {
+        throw new Error('Firebase auth is not available in this extension context.');
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      const auth = firebase.auth();
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+      let provider;
+      if (providerName === 'google') {
+        provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('profile');
+        provider.addScope('email');
+      } else {
+        provider = new firebase.auth.GithubAuthProvider();
+        provider.addScope('repo');
+      }
+
+      const result = await auth.signInWithPopup(provider);
+      const credential = result.credential || {};
+      const user = result.user;
+      const token = credential.accessToken || credential.oauthAccessToken || credential.idToken || '';
+
+      if (!token && providerName === 'github') {
+        throw new Error('GitHub did not return an access token.');
+      }
+
+      const session = {
+        provider: providerName,
+        userEmail: user ? user.email || '' : '',
+        userName: user ? user.displayName || '' : ''
+      };
+
+      await AlgoStorage.saveAuthSession(session);
+      await AlgoStorage.setAuthProvider(providerName);
+      if (token) {
+        await AlgoStorage.setToken(token);
+      }
+
+      return session;
     };
 
-    loginBtn.addEventListener('click', () => {
-      loginBtn.innerText = 'Opening Auth...';
+    loginBtn.addEventListener('click', async () => {
+      loginBtn.innerText = 'Connecting GitHub...';
       loginBtn.disabled = true;
-      openAuthPage('github');
-      setTimeout(() => {
+
+      try {
+        await authenticateWithFirebase('github');
+        await checkState();
+      } catch (error) {
+        console.error('GitHub auth failed:', error);
+        alert('GitHub login failed: ' + (error?.message || 'Unknown error'));
+      } finally {
         loginBtn.innerText = 'Connect GitHub Account';
         loginBtn.disabled = false;
-      }, 1200);
+      }
     });
 
-    googleLoginBtn.addEventListener('click', () => {
-      googleLoginBtn.innerText = 'Opening Google...';
+    googleLoginBtn.addEventListener('click', async () => {
+      googleLoginBtn.innerText = 'Connecting Google...';
       googleLoginBtn.disabled = true;
-      openAuthPage('google');
-      setTimeout(() => {
+
+      try {
+        await authenticateWithFirebase('google');
+        await checkState();
+      } catch (error) {
+        console.error('Google auth failed:', error);
+        alert('Google login failed: ' + (error?.message || 'Unknown error'));
+      } finally {
         googleLoginBtn.innerText = 'Continue with Google';
         googleLoginBtn.disabled = false;
-      }, 1200);
+      }
     });
 
     refreshReposBtn.addEventListener('click', async () => {
