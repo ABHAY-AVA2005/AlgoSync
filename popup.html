@@ -9,10 +9,11 @@
   <div id="auth-view" class="auth-view hidden">
     <img src="assets/AlgoSync extension logo.png" class="auth-icon" alt="AlgoSync">
     <h2 class="title" style="margin-bottom: 12px;">Welcome to AlgoSync</h2>
-    <p class="auth-desc">Your DSA Portfolio, Automated.<br>Continue with Google or connect GitHub.</p>
+    <p class="auth-desc">Your DSA Portfolio, Automated.<br>Paste your GitHub token to enable syncing.</p>
     <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
-      <button id="google-login-btn" class="secondary-btn">Continue with Google</button>
+      <input id="github-token-input" type="password" placeholder="GitHub personal access token" autocomplete="off" style="padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.03); color: var(--text-primary);" />
       <button id="login-btn" class="primary-btn">Connect GitHub Account</button>
+      <button id="google-login-btn" class="secondary-btn" disabled title="Google auth is not supported in this extension build because Chrome extension CSP blocks external auth scripts.">Google login unavailable</button>
     </div>
   </div>
 
@@ -106,10 +107,6 @@
     <div id="solved-list" class="solved-list"></div>
   </div>
 
-  <script src="lib/firebase-app-compat.js"></script>
-  <script src="lib/firebase-auth-compat.js"></script>
-  <script src="lib/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js"></script>
   <script src="storage-helper.js"></script>
   <script src="firestore-helper.js"></script>
   <script src="popup.js"></script>

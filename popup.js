@@ -43,6 +43,7 @@
     const dashboardView = document.getElementById('dashboard-view');
     const loginBtn = document.getElementById('login-btn');
     const googleLoginBtn = document.getElementById('google-login-btn');
+    const githubTokenInput = document.getElementById('github-token-input');
     const logoutBtn = document.getElementById('logout-btn');
     const refreshReposBtn = document.getElementById('refresh-repos');
     const exportDataBtn = document.getElementById('export-data');
@@ -572,82 +573,42 @@
       }
     });
 
-    const authenticateWithFirebase = async (providerName = 'github') => {
-      if (!window.firebase || !firebase.auth) {
-        throw new Error('Firebase auth is not available in this extension context.');
-      }
-
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-
-      const auth = firebase.auth();
-      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-      let provider;
-      if (providerName === 'google') {
-        provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('profile');
-        provider.addScope('email');
-      } else {
-        provider = new firebase.auth.GithubAuthProvider();
-        provider.addScope('repo');
-      }
-
-      const result = await auth.signInWithPopup(provider);
-      const credential = result.credential || {};
-      const user = result.user;
-      const token = credential.accessToken || credential.oauthAccessToken || credential.idToken || '';
-
-      if (!token && providerName === 'github') {
-        throw new Error('GitHub did not return an access token.');
-      }
-
-      const session = {
-        provider: providerName,
-        userEmail: user ? user.email || '' : '',
-        userName: user ? user.displayName || '' : ''
-      };
-
-      await AlgoStorage.saveAuthSession(session);
-      await AlgoStorage.setAuthProvider(providerName);
-      if (token) {
-        await AlgoStorage.setToken(token);
-      }
-
-      return session;
-    };
-
     loginBtn.addEventListener('click', async () => {
+      const token = (githubTokenInput.value || '').trim();
+      if (!token) {
+        alert('Please paste your GitHub personal access token first.');
+        githubTokenInput.focus();
+        return;
+      }
+
       loginBtn.innerText = 'Connecting GitHub...';
       loginBtn.disabled = true;
 
       try {
-        await authenticateWithFirebase('github');
+        const isValid = await fetch('https://api.github.com/user', {
+          headers: { Authorization: `token ${token}` }
+        });
+
+        if (!isValid.ok) {
+          throw new Error('The token is invalid or expired.');
+        }
+
+        await AlgoStorage.setToken(token);
+        await AlgoStorage.setAuthProvider('github');
+        await AlgoStorage.saveAuthSession({ provider: 'github' });
+        githubTokenInput.value = '';
         await checkState();
       } catch (error) {
-        console.error('GitHub auth failed:', error);
-        alert('GitHub login failed: ' + (error?.message || 'Unknown error'));
+        console.error('GitHub token validation failed:', error);
+        alert('GitHub connection failed: ' + (error?.message || 'Unknown error'));
       } finally {
         loginBtn.innerText = 'Connect GitHub Account';
         loginBtn.disabled = false;
       }
     });
 
-    googleLoginBtn.addEventListener('click', async () => {
-      googleLoginBtn.innerText = 'Connecting Google...';
-      googleLoginBtn.disabled = true;
-
-      try {
-        await authenticateWithFirebase('google');
-        await checkState();
-      } catch (error) {
-        console.error('Google auth failed:', error);
-        alert('Google login failed: ' + (error?.message || 'Unknown error'));
-      } finally {
-        googleLoginBtn.innerText = 'Continue with Google';
-        googleLoginBtn.disabled = false;
-      }
+    googleLoginBtn.addEventListener('click', () => {
+      alert('Google login is not supported in this extension build because Chrome blocks remote auth scripts in extension pages. Please use a GitHub token instead.');
     });
 
     refreshReposBtn.addEventListener('click', async () => {
